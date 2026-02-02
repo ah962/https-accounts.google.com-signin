@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block title %}الرئيسية - نظام التحقق{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>نظام تحقق آمن ومتكامل</h1>
+            <p>نظام متكامل للمصادقة وإدارة المستخدمين مع واجهة عربية سلسلة وأداء عالي.</p>
+            
+            <div class="hero-buttons">
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-tachometer-alt"></i> لوحة التحكم
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-secondary">
+                        <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="hero-image">
+            <img src="https://cdn.pixabay.com/photo/2017/05/09/13/33/laptop-2298286_1280.png" alt="نظام التحقق">
+        </div>
+    </div>
+</div>
+
+<div class="features">
+    <div class="container">
+        <h2 class="section-title">مميزات النظام</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>حماية متقدمة</h3>
+                <p>نظام تحقق آمن مع تشفير كلمات المرور وحماية من الهجمات.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>أداء عالي</h3>
+                <p>سرعة استجابة عالية مع واجهة مستخدم سلسة وسريعة.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>متجاوب مع الجوال</h3>
+                <p>واجهة متكاملة تعمل على جميع الأجهزة والأحجام.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3>كود نظيف</h3>
+                <p>كود منظم وسهل التطوير والصيانة.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
