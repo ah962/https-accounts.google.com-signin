@@ -1,0 +1,307 @@
+{% extends "layout.html" %}
+
+{% block title %}إنشاء حساب جديد{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2><i class="fas fa-user-plus"></i> إنشاء حساب جديد</h2>
+            <p>املأ النموذج أدناه لإنشاء حساب جديد</p>
+        </div>
+        
+        <form id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label for="fullName">
+                    <i class="fas fa-user"></i> الاسم الكامل
+                </label>
+                <input 
+                    type="text" 
+                    id="fullName" 
+                    name="full_name" 
+                    required
+                    placeholder="أدخل اسمك الكامل"
+                    autocomplete="name"
+                >
+                <div class="validation-feedback" id="nameFeedback"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope"></i> البريد الإلكتروني
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required
+                    placeholder="example@domain.com"
+                    autocomplete="email"
+                >
+                <div class="validation-feedback" id="emailFeedback"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock"></i> كلمة المرور
+                </label>
+                <div class="password-input">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required
+                        placeholder="كلمة مرور قوية"
+                        autocomplete="new-password"
+                    >
+                    <button type="button" class="password-toggle" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="password-strength" id="passwordStrength">
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <span class="strength-text" id="strengthText">قوة كلمة المرور</span>
+                </div>
+                <div class="validation-feedback" id="passwordFeedback"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">
+                    <i class="fas fa-lock"></i> تأكيد كلمة المرور
+                </label>
+                <div class="password-input">
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirm_password" 
+                        required
+                        placeholder="أعد إدخال كلمة المرور"
+                        autocomplete="new-password"
+                    >
+                    <button type="button" class="password-toggle" id="toggleConfirmPassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="validation-feedback" id="confirmFeedback"></div>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <span>أوافق على <a href="#">الشروط والأحكام</a> و <a href="#">سياسة الخصوصية</a></span>
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                    <i class="fas fa-user-plus"></i> إنشاء الحساب
+                </button>
+                
+                <div class="auth-links">
+                    <p>لديك حساب بالفعل؟ <a href="{{ url_for('login') }}">تسجيل الدخول</a></p>
+                </div>
+            </div>
+        </form>
+        
+        <div class="auth-result" id="authResult"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('registerForm');
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const submitBtn = document.getElementById('submitBtn');
+    const authResult = document.getElementById('authResult');
+    
+    // عناصر قوة كلمة المرور
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthText = document.getElementById('strengthText');
+    
+    // إظهار/إخفاء كلمة المرور
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+    
+    toggleConfirmPassword.addEventListener('click', function() {
+        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+    
+    // التحقق من قوة كلمة المرور أثناء الكتابة
+    passwordInput.addEventListener('input', function() {
+        checkPasswordStrength(this.value);
+        checkPasswordMatch();
+    });
+    
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+    
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        let messages = [];
+        
+        if (password.length >= 8) strength += 25;
+        if (/[A-Z]/.test(password)) strength += 25;
+        if (/[a-z]/.test(password)) strength += 25;
+        if (/[0-9]/.test(password)) strength += 15;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 10;
+        
+        strength = Math.min(strength, 100);
+        strengthFill.style.width = strength + '%';
+        
+        // تحديد النص واللون
+        if (strength < 40) {
+            strengthFill.style.backgroundColor = '#dc3545';
+            strengthText.textContent = 'ضعيفة';
+        } else if (strength < 70) {
+            strengthFill.style.backgroundColor = '#ffc107';
+            strengthText.textContent = 'متوسطة';
+        } else {
+            strengthFill.style.backgroundColor = '#28a745';
+            strengthText.textContent = 'قوية';
+        }
+    }
+    
+    function checkPasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const confirmFeedback = document.getElementById('confirmFeedback');
+        
+        if (confirmPassword && password !== confirmPassword) {
+            confirmFeedback.textContent = 'كلمات المرور غير متطابقة';
+            confirmFeedback.className = 'validation-feedback error';
+            return false;
+        } else {
+            confirmFeedback.textContent = '';
+            confirmFeedback.className = 'validation-feedback';
+            return true;
+        }
+    }
+    
+    // التحقق من البريد أثناء الكتابة
+    const emailInput = document.getElementById('email');
+    const emailFeedback = document.getElementById('emailFeedback');
+    
+    emailInput.addEventListener('blur', async function() {
+        const email = this.value.trim();
+        const emailFeedback = document.getElementById('emailFeedback');
+        
+        if (!email) {
+            emailFeedback.textContent = 'البريد الإلكتروني مطلوب';
+            emailFeedback.className = 'validation-feedback error';
+            return;
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            emailFeedback.textContent = 'صيغة البريد الإلكتروني غير صحيحة';
+            emailFeedback.className = 'validation-feedback error';
+            return;
+        }
+        
+        // التحقق من الخادم
+        try {
+            const response = await fetch('/api/validate-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email })
+            });
+            
+            const data = await response.json();
+            emailFeedback.textContent = data.message;
+            emailFeedback.className = `validation-feedback ${data.valid ? 'success' : 'error'}`;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+    
+    // إرسال النموذج
+    registerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = emailInput.value.trim().toLowerCase();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const terms = document.getElementById('terms').checked;
+        
+        // التحقق الأساسي
+        if (!fullName || !email || !password || !confirmPassword) {
+            showResult('الرجاء ملء جميع الحقول', 'error');
+            return;
+        }
+        
+        if (!terms) {
+            showResult('يجب الموافقة على الشروط والأحكام', 'error');
+            return;
+        }
+        
+        if (!checkPasswordMatch()) {
+            return;
+        }
+        
+        // تعطيل الزر أثناء المعالجة
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء الحساب...';
+        
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    confirm_password: confirmPassword,
+                    full_name: fullName
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showResult(data.message, 'success');
+                // الانتقال بعد تأخير قصير
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, 2000);
+            } else {
+                showResult(data.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء الحساب';
+            }
+            
+        } catch (error) {
+            showResult('حدث خطأ في الاتصال بالخادم', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء الحساب';
+            console.error('Error:', error);
+        }
+    });
+    
+    function showResult(message, type) {
+        authResult.textContent = message;
+        authResult.className = `auth-result ${type}`;
+        authResult.style.display = 'block';
+        
+        // إخفاء الرسالة بعد 5 ثواني
+        setTimeout(() => {
+            authResult.style.display = 'none';
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}
